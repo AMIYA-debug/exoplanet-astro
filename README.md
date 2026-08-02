@@ -1,4 +1,4 @@
-#Automated Exoplanet Detection from NASA Kepler Light Curves Using the InceptionTime Deep Learning Architecture
+# Automated Exoplanet Detection from NASA Kepler Light Curves Using the InceptionTime Deep Learning Architecture
 
 
 # Chapter 1
