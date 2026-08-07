@@ -49,11 +49,11 @@ The Kepler mission provides the highest-quality publicly available photometric o
 
 Alternative datasets such as TESS, ZTF and PLAsTiCC shall not be used because they either target different scientific objectives or provide shorter observation durations.
 
-The dataset shall be downloaded directly from the **Mikulski Archive for Space Telescopes (MAST)** to ensure access to the original calibrated observations.
+The dataset shall be downloaded directly from the **NASA Exoplanet Archive** to ensure access to the original calibrated observations.
 
 Dataset source
 
-https://mast.stsci.edu
+https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=cumulative
 
 ---
 
