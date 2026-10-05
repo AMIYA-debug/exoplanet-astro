@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import argparse
 import csv
-import sys
 from pathlib import Path
+import shutil
+import sys
 from typing import Any
 import numpy as np
 import pandas as pd
@@ -12,21 +13,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from process.io_utils import extract_kic_id, save_json, ensure_dir
+from process.io_utils import extract_kic_id, ensure_dir
 from process.preprocessing import preprocess_lightcurve, fold_lightcurve
 from process.bls import run_bls
-from process.transit_model import fit_batman_transit, evaluate_batman
+from process.transit_model import fit_batman_transit
 from process.mcmc import run_mcmc_sampler
-from process.plots import (
-    plot_processed_lightcurve,
-    plot_bls_detection,
-    plot_phase_folded,
-    plot_transit_candidate_zoom,
-    plot_batman_fit,
-    plot_residuals,
-    plot_mcmc_corner,
-    plot_mcmc_transit_fit,
-)
 from process.features import extract_candidate_features, features_to_dataframe
 from process.download import get_kepids_by_row_range, download_kepid_fits
 from process.merge import merge_kic_directory
@@ -52,38 +43,15 @@ def process_fits_file(
     if kic_id is None:
         kic_id = extract_kic_id(fits_file, fallback=fits_file.stem)
 
-    if output_dir is None:
-        target_dir = ensure_dir(PROJECT_ROOT / "outputs" / str(kic_id))
-    else:
-        out_path = Path(output_dir)
-        if out_path.name == str(kic_id):
-            target_dir = ensure_dir(out_path)
-        else:
-            target_dir = ensure_dir(out_path / str(kic_id))
-
     print(f"Processing FITS: {fits_file}")
     print(f"Target KIC:      {kic_id}")
-    print(f"Output folder:   {target_dir}")
 
     raw_df, cleaned_df, processed_df = preprocess_lightcurve(fits_file)
 
-    raw_path = target_dir / "raw_extracted.csv"
-    raw_df.to_csv(raw_path, index=False)
-
-    cleaned_path = target_dir / "cleaned_time_flux.csv"
-    cleaned_df.to_csv(cleaned_path, index=False)
-
-    processed_path = target_dir / "processed_time_flux.csv"
-    processed_df.to_csv(processed_path, index=False)
-
     time_arr = processed_df["TIME"].to_numpy(dtype=np.float64)
     flux_arr = processed_df["NORMALIZED_FLUX"].to_numpy(dtype=np.float64)
-    segments = processed_df["SEGMENT"].to_numpy(dtype=int)
 
-    plot_lc_path = target_dir / "processed_lightcurve.png"
-    plot_processed_lightcurve(time_arr, flux_arr, segments, kic_id, plot_lc_path)
-
-    bls_params, periodogram_df, bls_power = run_bls(
+    bls_params, _, _ = run_bls(
         time=time_arr,
         flux=flux_arr,
         period_min=1.0,
@@ -93,29 +61,10 @@ def process_fits_file(
         oversample=20,
     )
 
-    bls_results_path = target_dir / "bls_results.json"
-    save_json(bls_params, bls_results_path)
-
-    periodogram_path = target_dir / "bls_periodogram.csv"
-    periodogram_df.to_csv(periodogram_path, index=False)
-
     best_period = float(bls_params["BEST_PERIOD"])
     best_t0 = float(bls_params["BEST_TRANSIT_TIME"])
 
-    bls_plot_path = target_dir / "bls_periodogram.png"
-    period_grid = np.exp(np.linspace(np.log(1.0), np.log(15.0), n_periods))
-    plot_bls_detection(
-        bls_power=bls_power,
-        period_grid=period_grid,
-        best_period=best_period,
-        best_t0=best_t0,
-        time=time_arr,
-        flux=flux_arr,
-        kic_id=kic_id,
-        output_path=bls_plot_path,
-    )
-
-    folded_df, binned_df = fold_lightcurve(
+    _, binned_df = fold_lightcurve(
         time=time_arr,
         flux=flux_arr,
         period=best_period,
@@ -124,63 +73,13 @@ def process_fits_file(
         window=0.3,
     )
 
-    folded_path = target_dir / "phase_folded.csv"
-    folded_df.to_csv(folded_path, index=False)
-
-    binned_path = target_dir / "binned_transit.csv"
-    binned_df.to_csv(binned_path, index=False)
-
     t_fit = binned_df["phase_days"].to_numpy(dtype=np.float64)
     f_fit = binned_df["binned_flux"].to_numpy(dtype=np.float64)
 
-    folded_plot_path = target_dir / "phase_folded.png"
-    plot_phase_folded(
-        x_fold=folded_df["phase_days"].to_numpy(),
-        y_flux=folded_df["normalized_flux"].to_numpy(),
+    fit_params, _ = fit_batman_transit(
         t_fit=t_fit,
         f_fit=f_fit,
         period=best_period,
-        kic_id=kic_id,
-        output_path=folded_plot_path,
-    )
-
-    zoom_plot_path = target_dir / "transit_candidate_zoom.png"
-    plot_transit_candidate_zoom(
-        t_fit=t_fit,
-        f_fit=f_fit,
-        kic_id=kic_id,
-        period=best_period,
-        output_path=zoom_plot_path,
-    )
-
-    fit_params, model_df = fit_batman_transit(
-        t_fit=t_fit,
-        f_fit=f_fit,
-        period=best_period,
-    )
-
-    transit_fit_params_path = target_dir / "transit_fit_params.json"
-    save_json(fit_params, transit_fit_params_path)
-
-    model_df_path = target_dir / "model_fit.csv"
-    model_df.to_csv(model_df_path, index=False)
-
-    model_plot_path = target_dir / "transit_model.png"
-    plot_batman_fit(
-        t_fit=t_fit,
-        f_fit=f_fit,
-        model_flux=model_df["model_flux"].to_numpy(),
-        popt=fit_params,
-        kic_id=kic_id,
-        output_path=model_plot_path,
-    )
-
-    residual_plot_path = target_dir / "residuals.png"
-    plot_residuals(
-        t_fit=t_fit,
-        residuals=model_df["residuals"].to_numpy(),
-        kic_id=kic_id,
-        output_path=residual_plot_path,
     )
 
     mcmc_params: dict[str, Any] = {}
@@ -191,7 +90,7 @@ def process_fits_file(
             fit_params["inc_deg"],
             fit_params["t0_days"],
         ]
-        mcmc_params, samples_df = run_mcmc_sampler(
+        mcmc_params, _ = run_mcmc_sampler(
             t_fit=t_fit,
             f_fit=f_fit,
             period=best_period,
@@ -201,32 +100,6 @@ def process_fits_file(
             discard=500,
             thin=10,
         )
-
-        mcmc_results_path = target_dir / "mcmc_results.json"
-        save_json(mcmc_params, mcmc_results_path)
-
-        samples_path = target_dir / "posterior_samples.csv"
-        samples_df.to_csv(samples_path, index=False)
-
-        corner_plot_path = target_dir / "mcmc_corner.png"
-        truths = [
-            mcmc_params["k"]["median"],
-            mcmc_params["a_rstar"]["median"],
-            mcmc_params["inc_deg"]["median"],
-            mcmc_params["t0_phase_days"]["median"],
-        ]
-        plot_mcmc_corner(samples_df, truths, kic_id, corner_plot_path)
-
-        mcmc_best_model = evaluate_batman(
-            t_fit,
-            mcmc_params["k"]["median"],
-            mcmc_params["a_rstar"]["median"],
-            mcmc_params["inc_deg"]["median"],
-            mcmc_params["t0_phase_days"]["median"],
-            best_period,
-        )
-        mcmc_fit_plot_path = target_dir / "mcmc_transit_fit.png"
-        plot_mcmc_transit_fit(t_fit, f_fit, mcmc_best_model, kic_id, mcmc_fit_plot_path)
 
     obs_stats = {
         "raw": len(raw_df),
@@ -252,32 +125,7 @@ def process_fits_file(
         "transit_model": fit_params,
         "mcmc": mcmc_params,
         "features": feature_dict,
-        "saved_files": {
-            "raw_extracted": str(raw_path),
-            "cleaned_time_flux": str(cleaned_path),
-            "processed_time_flux": str(processed_path),
-            "bls_results": str(bls_results_path),
-            "bls_periodogram": str(periodogram_path),
-            "phase_folded": str(folded_path),
-            "binned_transit": str(binned_path),
-            "transit_fit_params": str(transit_fit_params_path),
-            "model_fit": str(model_df_path),
-            "mcmc_results": str(target_dir / "mcmc_results.json") if run_mcmc else None,
-            "posterior_samples": str(target_dir / "posterior_samples.csv") if run_mcmc else None,
-            "plots": {
-                "processed_lightcurve": str(plot_lc_path),
-                "bls_periodogram": str(bls_plot_path),
-                "phase_folded": str(folded_plot_path),
-                "transit_candidate_zoom": str(zoom_plot_path),
-                "transit_model": str(model_plot_path),
-                "residuals": str(residual_plot_path),
-                "mcmc_corner": str(target_dir / "mcmc_corner.png") if run_mcmc else None,
-                "mcmc_transit_fit": str(target_dir / "mcmc_transit_fit.png") if run_mcmc else None,
-            },
-        },
     }
-
-    save_json(summary, target_dir / "summary.json")
 
     print(f"Results for KIC {kic_id}:")
     print(f"  BLS Period:   {best_period:.5f} days")
@@ -359,25 +207,22 @@ def run_dataset_pipeline(
     run_mcmc: bool = False,
     mcmc_steps: int = 1500,
     n_periods: int = 50000,
-    keep_combined: bool = True,
-    cleanup_individual: bool = True,
 ) -> pd.DataFrame:
     fits_dir = ensure_dir(fits_root)
     processed_dir = ensure_dir(processed_root)
     ml_dir = ensure_dir(ml_root)
+    output_csv = ml_dir / "transit_dataset.csv"
 
     koi_catalog = load_koi_catalog(metadata_csv)
     target_kics = get_kepids_by_row_range(metadata_csv, start_index, end_index)
 
     print(f"Dataset indices {start_index}–{end_index}: {len(target_kics)} unique KICs")
-    dataset_rows: list[dict[str, Any]] = []
+    all_new_rows: list[dict[str, Any]] = []
 
     for kic in target_kics:
         kic_str = str(kic)
         kic_folder = fits_dir / kic_str
         combined_file = kic_folder / "combined.fits"
-
-        individual_fits: list[Path] = []
 
         if not combined_file.is_file():
             print(f"Downloading KIC {kic_str}...")
@@ -418,35 +263,43 @@ def run_dataset_pipeline(
             koi_name, disposition = match_candidate_to_koi(kic_str, bls_p, koi_catalog)
             feature_row["koi_name"] = koi_name
             feature_row["koi_disposition"] = disposition
-            dataset_rows.append(feature_row)
+
+            row_df = features_to_dataframe([feature_row])
+            if output_csv.is_file():
+                existing = pd.read_csv(output_csv)
+                combined_df = pd.concat([existing, row_df], ignore_index=True).drop_duplicates(
+                    subset=["kic", "candidate_rank"], keep="last"
+                )
+                combined_df.to_csv(output_csv, index=False)
+            else:
+                row_df.to_csv(output_csv, index=False)
+
+            all_new_rows.append(feature_row)
+
+            if kic_folder.exists():
+                shutil.rmtree(kic_folder, ignore_errors=True)
+
+            kic_processed_folder = processed_dir / kic_str
+            if kic_processed_folder.exists():
+                shutil.rmtree(kic_processed_folder, ignore_errors=True)
+
+            for residual_csv in processed_dir.glob(f"*{kic_str}*.csv"):
+                try:
+                    residual_csv.unlink()
+                except OSError:
+                    pass
 
         except Exception as err:
             print(f"  Processing failed for KIC {kic_str}: {err}")
             continue
 
-        if cleanup_individual and individual_fits:
-            for f in individual_fits:
-                try:
-                    if f.exists() and f.name != "combined.fits":
-                        f.unlink()
-                except OSError:
-                    pass
-
-    df_ml = features_to_dataframe(dataset_rows)
-    output_csv = ml_dir / "transit_dataset.csv"
-
     if output_csv.is_file():
-        existing = pd.read_csv(output_csv)
-        combined_df = pd.concat([existing, df_ml], ignore_index=True).drop_duplicates(
-            subset=["kic", "candidate_rank"], keep="last"
-        )
-        combined_df.to_csv(output_csv, index=False)
-        print(f"Appended {len(df_ml)} rows → dataset now {len(combined_df)} rows at {output_csv}")
+        final_df = pd.read_csv(output_csv)
+        print(f"Dataset updated: {len(final_df)} rows at {output_csv}")
     else:
-        df_ml.to_csv(output_csv, index=False)
-        print(f"Dataset saved: {len(df_ml)} rows at {output_csv}")
+        final_df = features_to_dataframe(all_new_rows)
 
-    return df_ml
+    return final_df
 
 
 def main() -> None:
@@ -484,18 +337,6 @@ def main() -> None:
     parser.add_argument("--mcmc", action="store_true", help="Run MCMC sampling.")
     parser.add_argument("--mcmc-steps", type=int, default=1500)
     parser.add_argument("--n-periods", type=int, default=50000)
-    parser.add_argument(
-        "--keep-combined",
-        action="store_true",
-        default=True,
-        help="Keep combined.fits after processing (default: True).",
-    )
-    parser.add_argument(
-        "--delete-combined",
-        action="store_true",
-        default=False,
-        help="Delete combined.fits after successful processing.",
-    )
     args = parser.parse_args()
 
     if args.index is not None:
@@ -517,8 +358,6 @@ def main() -> None:
         run_mcmc=args.mcmc,
         mcmc_steps=args.mcmc_steps,
         n_periods=args.n_periods,
-        keep_combined=not args.delete_combined,
-        cleanup_individual=True,
     )
 
 
