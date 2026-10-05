@@ -1,15 +1,3 @@
-"""Plotting routines matching the reference notebook visualizations.
-
-Implements:
-1. Processed light curve across time (demonstrating common flat baseline)
-2. BLS periodogram and folded candidate (notebook Cell 16)
-3. Phase-folded transit (binned + unbinned)
-4. Transit candidate zoom
-5. BATMAN transit fit (notebook Cell 28)
-6. Residuals inspection
-7. MCMC corner plot (notebook Cell 33)
-8. MCMC best-fit model (notebook Cell 33)
-"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -28,11 +16,9 @@ def plot_processed_lightcurve(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Plot the full processed light curve to verify the uniform baseline."""
     plt.figure(figsize=(15, 5))
     plt.plot(time, flux, "k.", ms=1.5, alpha=0.5, label="Normalized Flux")
     plt.axhline(1.0, color="red", linestyle="--", lw=1.0, label="Baseline (1.0)")
-
     plt.xlabel("Time [BKJD]")
     plt.ylabel("Normalized Flux")
     plt.title(f"KIC {kic_id} – Preprocessed & Quarter-Normalized Light Curve")
@@ -54,10 +40,8 @@ def plot_bls_detection(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Generate two-panel BLS detection plot matching notebook Cell 16."""
     fig, axes = plt.subplots(2, 1, figsize=(10, 10))
 
-    # 1. Periodogram
     ax = axes[0]
     ax.axvline(np.log10(best_period), color="C1", lw=4, alpha=0.8)
     ax.plot(np.log10(bls_power.period), bls_power.power, "k", lw=0.8)
@@ -76,7 +60,6 @@ def plot_bls_detection(
     ax.set_title(f"KIC {kic_id} – BLS Periodogram")
     ax.grid(True, alpha=0.25)
 
-    # 2. Folded Transit (notebook histogram-weighted binning)
     ax = axes[1]
     x_fold = (time - best_t0 + 0.5 * best_period) % best_period - 0.5 * best_period
     m = np.abs(x_fold) < 0.4
@@ -118,12 +101,10 @@ def plot_phase_folded(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Plot phase-folded light curve with unbinned observations and binned points."""
     plt.figure(figsize=(10, 5))
     m = np.abs(x_fold) <= 0.3
     plt.plot(x_fold[m], y_flux[m], "k.", ms=2.0, alpha=0.3, label="Unbinned data")
     plt.plot(t_fit, f_fit, "r-", lw=2.0, label="Binned curve (width=0.002 d)")
-
     plt.xlabel("Phase (days)")
     plt.ylabel("Normalized Flux")
     plt.title(f"KIC {kic_id} – Phase Folded Light Curve (P = {period:.5f} d)")
@@ -142,7 +123,6 @@ def plot_transit_candidate_zoom(
     period: float,
     output_path: Path | str,
 ) -> None:
-    """Plot zoomed-in view of the transit dip."""
     plt.figure(figsize=(8, 5))
     plt.plot(t_fit, f_fit, "ko-", ms=4, lw=1.2, label="Binned observations")
     plt.axhline(1.0, color="gray", linestyle="--", alpha=0.7)
@@ -165,7 +145,6 @@ def plot_batman_fit(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Plot BATMAN transit model fit matching notebook Cell 28."""
     plt.figure(figsize=(10, 5))
     plt.plot(t_fit, f_fit, "ko", ms=4, label="Binned data")
     plt.plot(t_fit, model_flux, "r-", lw=2, label="Best-fit model")
@@ -201,7 +180,6 @@ def plot_residuals(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Plot fit residuals to inspect for systematic errors."""
     plt.figure(figsize=(10, 4))
     plt.plot(t_fit, residuals, "ko", ms=4, alpha=0.7, label="Residuals (Data - Model)")
     plt.axhline(0.0, color="red", linestyle="--", lw=1.5)
@@ -232,7 +210,6 @@ def plot_mcmc_corner(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Generate corner plot of MCMC posteriors matching notebook Cell 33."""
     samples = samples_df.to_numpy() if hasattr(samples_df, "to_numpy") else np.asarray(samples_df)
     labels = ["k (Rp/R*)", "a/R*", "inc [deg]", "t0 [d]"]
 
@@ -257,11 +234,9 @@ def plot_mcmc_transit_fit(
     kic_id: str,
     output_path: Path | str,
 ) -> None:
-    """Plot best-fit MCMC transit model matching notebook Cell 33."""
     plt.figure(figsize=(7, 5))
     plt.plot(t_fit, f_fit, ".k", label="Binned data")
     plt.plot(t_fit, best_model_flux, "r-", lw=2, label="Best-fit model (MCMC)")
-
     plt.xlabel("Phase (days)")
     plt.ylabel("Normalized Flux")
     plt.title(f"KIC {kic_id} – BATMAN + MCMC Transit Fit")

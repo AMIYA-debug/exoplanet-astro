@@ -1,14 +1,3 @@
-"""Markov Chain Monte Carlo (MCMC) parameter estimation using emcee.
-
-Faithfully reproduces notebook Cell 33:
-    def transit_model(theta, t): ...
-    def log_prior(theta): ...
-    def log_likelihood(theta, t, f, sigma): ...
-    def log_prob(theta, t, f, sigma): ...
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, args=(t, f, sigma))
-    sampler.run_mcmc(p0, 3000, progress=True)
-    samples = sampler.get_chain(discard=500, thin=10, flat=True)
-"""
 from __future__ import annotations
 
 from typing import Any
@@ -29,32 +18,14 @@ def run_mcmc_sampler(
     thin: int = 10,
     random_seed: int = 42,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
-    """Execute MCMC sampling for transit parameters matching notebook Cell 33.
-
-    Args:
-        t_fit: Phase centers (days).
-        f_fit: Binned normalized flux.
-        period: Orbital period in days (fixed from BLS).
-        initial: Initial center for walkers [k, a/R*, inc, t0].
-        nwalkers: Number of MCMC walkers (notebook default: 32).
-        nsteps: Number of production steps per walker.
-        discard: Number of initial burn-in steps to discard (notebook: 500).
-        thin: Thinning factor (notebook: 10).
-        random_seed: Seed for reproducible walker initialization.
-
-    Returns:
-        (mcmc_results_dict, samples_df)
-    """
     np.random.seed(random_seed)
     t = np.asarray(t_fit, dtype=np.float64)
     f = np.asarray(f_fit, dtype=np.float64)
 
-    # Estimate photometric scatter from out-of-transit data
     oot_mask = np.abs(t) > 0.08
     sigma_val = float(np.std(f[oot_mask])) if np.sum(oot_mask) > 10 else float(np.std(f))
     sigma = sigma_val * np.ones_like(f)
 
-    # Prior bounds matching notebook (extended lower k bound for Kepler depths)
     k_min, k_max = 0.001, 0.30
     a_min, a_max = 2.0, 30.0
     inc_min, inc_max = 80.0, 90.0
@@ -83,7 +54,6 @@ def run_mcmc_sampler(
         return lp + log_likelihood(theta)
 
     ndim = 4
-    # Ensure initial point is within prior interior
     init_clamped = np.array(
         [
             np.clip(initial[0], k_min + 0.001, k_max - 0.01),
@@ -101,17 +71,14 @@ def run_mcmc_sampler(
 
     samples = sampler.get_chain(discard=discard, thin=thin, flat=True)
 
-    # Median and percentiles (16th, 50th, 84th)
     k_m, a_m, inc_m, t0_m = np.median(samples, axis=0)
     p16 = np.percentile(samples, 16, axis=0)
     p84 = np.percentile(samples, 84, axis=0)
     stds = np.std(samples, axis=0)
 
-    # Derived physical properties
     transit_depth_m = float(k_m**2)
     transit_depth_err = float(2.0 * k_m * stds[0])
     duration_days_m = calculate_analytical_duration(period, k_m, a_m, inc_m)
-    duration_hours_m = float(duration_days_m * 24.0)
 
     mcmc_results = {
         "k": {
@@ -150,7 +117,7 @@ def run_mcmc_sampler(
         "transit_depth_ppm": float(transit_depth_m * 1e6),
         "transit_depth_err_ppm": float(transit_depth_err * 1e6),
         "transit_duration_days": duration_days_m,
-        "transit_duration_hours": duration_hours_m,
+        "transit_duration_hours": float(duration_days_m * 24.0),
         "nwalkers": nwalkers,
         "nsteps": nsteps,
         "discard": discard,

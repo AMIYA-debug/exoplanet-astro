@@ -1,11 +1,3 @@
-"""Box Least Squares (BLS) period search following the reference notebook.
-
-Reproduces the notebook methodology:
-    period_grid = np.exp(np.linspace(np.log(1), np.log(15), 50000))
-    bls = BoxLeastSquares(time, flux)
-    bls_power = bls.power(period_grid, 0.1, oversample=20)
-    index = np.argmax(bls_power.power)
-"""
 from __future__ import annotations
 
 from typing import Any
@@ -23,31 +15,14 @@ def run_bls(
     duration: float = 0.1,
     oversample: int = 20,
 ) -> tuple[dict[str, Any], pd.DataFrame, Any]:
-    """Execute Box Least Squares periodogram matching notebook parameters.
+    time_arr = np.asarray(time, dtype=np.float64)
+    flux_arr = np.asarray(flux, dtype=np.float64)
 
-    Args:
-        time: Array of observation times (float days, e.g. BKJD).
-        flux: Array of normalized flux values.
-        period_min: Minimum period in days (notebook default: 1.0).
-        period_max: Maximum period in days (notebook default: 15.0).
-        n_periods: Number of grid points (notebook default: 50000).
-        duration: Transit duration for BLS in days (notebook default: 0.1).
-        oversample: Oversampling factor (notebook default: 20).
-
-    Returns:
-        (best_params, periodogram_df, bls_power_object)
-    """
-    time = np.asarray(time, dtype=np.float64)
-    flux = np.asarray(flux, dtype=np.float64)
-
-    # Replicate exact log-uniform period grid from notebook
     period_grid = np.exp(np.linspace(np.log(period_min), np.log(period_max), n_periods))
 
-    # Astropy BLS computation
-    bls = BoxLeastSquares(time, flux)
+    bls = BoxLeastSquares(time_arr, flux_arr)
     bls_power = bls.power(period_grid, duration, oversample=oversample)
 
-    # Best candidate selection (argmax of BLS power)
     best_idx = int(np.argmax(bls_power.power))
     best_period = float(bls_power.period[best_idx])
     best_t0 = float(bls_power.transit_time[best_idx])
@@ -55,16 +30,14 @@ def run_bls(
     best_power = float(bls_power.power[best_idx])
     best_duration = float(bls_power.duration[best_idx])
 
-    # Compute depth SNR if available
     depth_snr = (
         float(bls_power.depth_snr[best_idx])
         if hasattr(bls_power, "depth_snr")
         else float(np.nan)
     )
 
-    # Identify secondary peaks sufficiently separated from the best period
     sorted_indices = np.argsort(bls_power.power)[::-1]
-    top_candidates = []
+    top_candidates: list[dict[str, Any]] = []
     for idx in sorted_indices:
         p_cand = float(bls_power.period[idx])
         pow_cand = float(bls_power.power[idx])
