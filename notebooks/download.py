@@ -5,7 +5,7 @@ import tempfile
 import time
 import lightkurve as lk 
 
-root = Path(__file__).resolve().parent
+root = Path(__file__).resolve().parent.parent
 csv_file = root / "data/raw/metadata/cumulative_2026.10.02_06.40.58_kepid_descending.csv"
 fits_folder = root / "data/raw/fits"
 

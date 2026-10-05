@@ -3,7 +3,7 @@ import re
 import shutil
 
 
-fits_folder = Path(__file__).resolve().parent / "data/raw/fits"
+fits_folder = Path(__file__).resolve().parent.parent / "data/raw/fits"
 
 for file in fits_folder.iterdir():
     if not file.is_file() or file.suffix.lower() not in {".fits", ".fit"}:

@@ -1,20 +1,31 @@
-from pathlib import Path
+"""Clean and normalize raw observations.
 
-import numpy as np
+Applies:
+1. Quality filtering: SAP_QUALITY == 0 (notebook methodology)
+2. Non-finite removal: finite TIME and PDCSAP_FLUX
+3. Quarter-by-quarter median normalization: eliminates inter-quarter baseline offsets
+"""
+from __future__ import annotations
+
+from pathlib import Path
+import sys
 import pandas as pd
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from process.io import clean_observations, normalize_by_segment
 
 
 INPUT_ROOT = Path("/home/amiya/projects/astronitr/process/data")
-COLUMNS = ["TIME", "PDCSAP_FLUX"]
 
 
-def clean_file(input_path: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return the input observations and the subset with finite required values."""
-    observations = pd.read_csv(input_path, usecols=COLUMNS)
-    valid_rows = np.isfinite(observations["TIME"]) & np.isfinite(
-        observations["PDCSAP_FLUX"]
-    )
-    return observations, observations.loc[valid_rows, COLUMNS]
+def clean_and_normalize(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Clean observations and apply quarter-by-quarter median normalization."""
+    cleaned = clean_observations(df)
+    normalized = normalize_by_segment(cleaned)
+    return cleaned, normalized
 
 
 def main() -> None:
@@ -24,13 +35,14 @@ def main() -> None:
             continue
 
         print(f"Processing ID: {id_directory.name}")
-        observations, cleaned_observations = clean_file(input_path)
+        raw_df = pd.read_csv(input_path)
+        cleaned_df, normalized_df = clean_and_normalize(raw_df)
 
         output_path = id_directory / "cleaned_time_flux.csv"
-        cleaned_observations.to_csv(output_path, index=False)
+        normalized_df.to_csv(output_path, index=False)
 
-        print(f"Original observations: {len(observations)}")
-        print(f"Valid observations: {len(cleaned_observations)}")
+        print(f"Original observations: {len(raw_df)}")
+        print(f"Valid observations:    {len(normalized_df)}")
         print(f"Saved: {output_path}")
 
 

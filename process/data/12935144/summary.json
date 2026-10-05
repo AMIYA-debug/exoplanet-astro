@@ -1,0 +1,157 @@
+{
+  "kic": "12935144",
+  "fits_file": "/home/amiya/projects/astronitr/data/raw/fits/12935144/combined.fits",
+  "observations": {
+    "raw": 69302,
+    "cleaned": 59842,
+    "processed": 59842
+  },
+  "bls": {
+    "BEST_PERIOD": 1.0993018852290277,
+    "BEST_DURATION": 0.1,
+    "BEST_TRANSIT_TIME": 132.60195475665736,
+    "BEST_POWER": 8.333774299815393e-05,
+    "BEST_DEPTH": 0.0001759312592590023,
+    "BEST_DEPTH_SNR": 0.012315716169142609,
+    "TOP_CANDIDATES": [
+      {
+        "rank": 1,
+        "period": 1.0993018852290277,
+        "power": 8.333774299815393e-05,
+        "transit_time": 132.60195475665736,
+        "depth": 0.0001759312592590023,
+        "duration": 0.1
+      },
+      {
+        "rank": 2,
+        "period": 2.1985269309393254,
+        "power": 4.500088773163331e-05,
+        "transit_time": 132.62695475665737,
+        "depth": 0.00018267750238837028,
+        "duration": 0.1
+      },
+      {
+        "rank": 3,
+        "period": 3.2979435468309832,
+        "power": 3.3453503541733124e-05,
+        "transit_time": 132.59695475665737,
+        "depth": 0.0001915766026163708,
+        "duration": 0.1
+      },
+      {
+        "rank": 4,
+        "period": 5.496446274964211,
+        "power": 2.702690518505309e-05,
+        "transit_time": 133.71695475665737,
+        "depth": 0.0002203766488505213,
+        "duration": 0.1
+      },
+      {
+        "rank": 5,
+        "period": 4.3971383399531785,
+        "power": 2.634863605092445e-05,
+        "transit_time": 132.61195475665735,
+        "depth": 0.00020071979057539557,
+        "duration": 0.1
+      }
+    ]
+  },
+  "transit_model": {
+    "k_rp_rstar": 0.01639585788114225,
+    "k_err": 0.0033021566658248827,
+    "a_rstar": 8.367847627352107,
+    "a_err": 41.32737089021566,
+    "inc_deg": 88.20966415902805,
+    "inc_err": 128.5543292080005,
+    "t0_days": -0.006992938792001078,
+    "t0_err": 0.0002122004240304442,
+    "transit_depth": 0.0002688241556586144,
+    "transit_depth_ppm": 268.8241556586144,
+    "transit_duration_days": 0.04118776522244641,
+    "transit_duration_hours": 0.9885063653387138,
+    "rms_residuals": 9.767839238535638e-05,
+    "period_fixed": 1.0993018852290277
+  },
+  "mcmc": {
+    "k": {
+      "median": 0.015085835915520495,
+      "std": 0.0006220246121338198,
+      "p16": 0.014458251839532433,
+      "p84": 0.015700231198368633,
+      "err_minus": 0.0006275840759880618,
+      "err_plus": 0.0006143952828481375
+    },
+    "a_rstar": {
+      "median": 5.345671196109157,
+      "std": 0.623452742756382,
+      "p16": 4.702804339455555,
+      "p84": 5.905170113211053,
+      "err_minus": 0.642866856653602,
+      "err_plus": 0.5594989171018963
+    },
+    "inc_deg": {
+      "median": 86.66851812012459,
+      "std": 2.6275866083731962,
+      "p16": 83.13722845133971,
+      "p84": 88.9778651338951,
+      "err_minus": 3.531289668784879,
+      "err_plus": 2.3093470137705054
+    },
+    "t0_phase_days": {
+      "median": -0.00357410741487403,
+      "std": 0.0019703206236403297,
+      "p16": -0.005934253500937033,
+      "p84": -0.0022183248732752844,
+      "err_minus": 0.0023601460860630027,
+      "err_plus": 0.0013557825415987457
+    },
+    "transit_depth": 0.00022758244527000808,
+    "transit_depth_ppm": 227.5824452700081,
+    "transit_depth_err_ppm": 18.767522468132167,
+    "transit_duration_days": 0.06371638699746099,
+    "transit_duration_hours": 1.5291932879390637,
+    "nwalkers": 32,
+    "nsteps": 2500,
+    "discard": 500,
+    "thin": 10,
+    "total_samples": 6400
+  },
+  "validation": {
+    "catalog_reference": {
+      "kepoi_name": "K02847.01",
+      "period_days": 1.099291188,
+      "epoch_bkjd": 131.50242,
+      "depth_ppm": 282.6,
+      "duration_hours": 1.765,
+      "rp_rstar": 0.014873,
+      "inclination_deg": 89.09
+    },
+    "period_diff_pct": 0.0009731024085758122,
+    "depth_diff_pct": 4.874679526321871,
+    "rp_rstar_diff_pct": 10.239076723877147,
+    "consistent_with_catalog": true
+  },
+  "saved_files": {
+    "raw_extracted": "/home/amiya/projects/astronitr/process/data/12935144/raw_extracted.csv",
+    "cleaned_time_flux": "/home/amiya/projects/astronitr/process/data/12935144/cleaned_time_flux.csv",
+    "processed_time_flux": "/home/amiya/projects/astronitr/process/data/12935144/processed_time_flux.csv",
+    "bls_results": "/home/amiya/projects/astronitr/process/data/12935144/bls_results.json",
+    "bls_periodogram": "/home/amiya/projects/astronitr/process/data/12935144/bls_periodogram.csv",
+    "phase_folded": "/home/amiya/projects/astronitr/process/data/12935144/phase_folded.csv",
+    "binned_transit": "/home/amiya/projects/astronitr/process/data/12935144/binned_transit.csv",
+    "transit_fit_params": "/home/amiya/projects/astronitr/process/data/12935144/transit_fit_params.json",
+    "model_fit": "/home/amiya/projects/astronitr/process/data/12935144/model_fit.csv",
+    "mcmc_results": "/home/amiya/projects/astronitr/process/data/12935144/mcmc_results.json",
+    "posterior_samples": "/home/amiya/projects/astronitr/process/data/12935144/posterior_samples.csv",
+    "plots": {
+      "processed_lightcurve": "/home/amiya/projects/astronitr/process/data/12935144/processed_lightcurve.png",
+      "bls_periodogram": "/home/amiya/projects/astronitr/process/data/12935144/bls_periodogram.png",
+      "phase_folded": "/home/amiya/projects/astronitr/process/data/12935144/phase_folded.png",
+      "transit_candidate_zoom": "/home/amiya/projects/astronitr/process/data/12935144/transit_candidate_zoom.png",
+      "transit_model": "/home/amiya/projects/astronitr/process/data/12935144/transit_model.png",
+      "residuals": "/home/amiya/projects/astronitr/process/data/12935144/residuals.png",
+      "mcmc_corner": "/home/amiya/projects/astronitr/process/data/12935144/mcmc_corner.png",
+      "mcmc_transit_fit": "/home/amiya/projects/astronitr/process/data/12935144/mcmc_transit_fit.png"
+    }
+  }
+}
