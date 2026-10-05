@@ -1,0 +1,162 @@
+{
+  "input": "/home/amiya/projects/astronitr/process_fits/1293031/extracted_time_flux.csv",
+  "label": "1293031",
+  "observations": {
+    "raw": 69778,
+    "cleaned": 57030,
+    "processed": 57030,
+    "time_span_days": 1470.4622004425764
+  },
+  "bls": {
+    "BEST_PERIOD": 1.0787758458152823,
+    "BEST_DURATION": 0.1,
+    "BEST_TRANSIT_TIME": 121.12931225479028,
+    "BEST_POWER": 0.00023295880297371726,
+    "BEST_DEPTH": 0.0002961872845691889,
+    "BEST_DEPTH_SNR": 0.020555494766752835,
+    "TOP_CANDIDATES": [
+      {
+        "rank": 1,
+        "period": 1.0787758458152823,
+        "power": 0.00023295880297371726,
+        "transit_time": 121.12931225479028,
+        "depth": 0.0002961872845691889,
+        "duration": 0.1
+      },
+      {
+        "rank": 2,
+        "period": 2.1574762868505637,
+        "power": 0.00011134709952291376,
+        "transit_time": 122.23931225479028,
+        "depth": 0.00029054744219484963,
+        "duration": 0.1
+      },
+      {
+        "rank": 3,
+        "period": 3.23636472109063,
+        "power": 7.642469569048256e-05,
+        "transit_time": 121.12431225479027,
+        "depth": 0.0002931189409373552,
+        "duration": 0.1
+      },
+      {
+        "rank": 4,
+        "period": 4.315035474410684,
+        "power": 5.48166934738347e-05,
+        "transit_time": 122.22431225479028,
+        "depth": 0.0002872161954438836,
+        "duration": 0.1
+      },
+      {
+        "rank": 5,
+        "period": 5.393817257047131,
+        "power": 4.199460270039292e-05,
+        "transit_time": 121.14431225479028,
+        "depth": 0.00028135461573144504,
+        "duration": 0.1
+      }
+    ]
+  },
+  "transit_model": {
+    "k_rp_rstar": 0.016994072871929066,
+    "k_err": 0.005558970442954057,
+    "a_rstar": 8.501110472181136,
+    "a_err": 77.00523632329946,
+    "inc_deg": 86.48425643788534,
+    "inc_err": 115.84219365611035,
+    "t0_days": -5.56551220929753e-05,
+    "t0_err": 0.0009575014816019864,
+    "transit_depth": 0.0002887985127764354,
+    "transit_depth_ppm": 288.7985127764354,
+    "transit_duration_days": 0.0354010705197953,
+    "transit_duration_hours": 0.8496256924750871,
+    "rms_residuals": 0.0001519841638605326,
+    "period_fixed": 1.0787758458152823
+  },
+  "mcmc": {
+    "k": {
+      "median": 0.01591273939792729,
+      "std": 0.00035044775966998744,
+      "p16": 0.015560901192665844,
+      "p84": 0.016256220467572694,
+      "err_minus": 0.0003518382052614469,
+      "err_plus": 0.0003434810696454037
+    },
+    "a_rstar": {
+      "median": 2.0090361735120323,
+      "std": 0.01320608894712933,
+      "p16": 2.002341701421582,
+      "p84": 2.0233548818092406,
+      "err_minus": 0.006694472090450265,
+      "err_plus": 0.014318708297208271
+    },
+    "inc_deg": {
+      "median": 88.00496974274057,
+      "std": 1.677934293617344,
+      "p16": 85.99691486136157,
+      "p84": 89.36391091383726,
+      "err_minus": 2.008054881378996,
+      "err_plus": 1.3589411710966885
+    },
+    "t0_phase_days": {
+      "median": -0.007201825364982211,
+      "std": 0.004803219782886974,
+      "p16": -0.013878169337076116,
+      "p84": -0.003838241261853039,
+      "err_minus": 0.006676343972093905,
+      "err_plus": 0.0033635841031291725
+    },
+    "transit_depth": 0.0002532152751463474,
+    "transit_depth_ppm": 253.21527514634738,
+    "transit_depth_err_ppm": 11.153167744431927,
+    "transit_duration_days": 0.1816934850130939,
+    "transit_duration_hours": 4.360643640314254,
+    "nwalkers": 32,
+    "nsteps": 2500,
+    "discard": 500,
+    "thin": 10,
+    "total_samples": 6400
+  },
+  "features": {
+    "kic": "1293031",
+    "candidate_rank": 1,
+    "bls_period_days": 1.0787758458152823,
+    "bls_transit_time_bkjd": 121.12931225479028,
+    "bls_duration_days": 0.1,
+    "bls_duration_hours": 2.4000000000000004,
+    "bls_power": 0.00023295880297371726,
+    "bls_depth": 0.0002961872845691889,
+    "bls_depth_ppm": 296.18728456918893,
+    "bls_depth_snr": 0.020555494766752835,
+    "fit_rp_rstar": 0.016994072871929066,
+    "fit_rp_rstar_err": 0.005558970442954057,
+    "fit_a_rstar": 8.501110472181136,
+    "fit_a_rstar_err": 77.00523632329946,
+    "fit_inc_deg": 86.48425643788534,
+    "fit_inc_err": 115.84219365611035,
+    "fit_t0_phase_days": -5.56551220929753e-05,
+    "fit_t0_err": 0.0009575014816019864,
+    "fit_depth_ppm": 288.7985127764354,
+    "fit_duration_hours": 0.8496256924750871,
+    "fit_rms_residuals_ppm": 151.9841638605326,
+    "mcmc_rp_rstar_median": 0.01591273939792729,
+    "mcmc_rp_rstar_std": 0.00035044775966998744,
+    "mcmc_rp_rstar_err_minus": 0.0003518382052614469,
+    "mcmc_rp_rstar_err_plus": 0.0003434810696454037,
+    "mcmc_a_rstar_median": 2.0090361735120323,
+    "mcmc_a_rstar_std": 0.01320608894712933,
+    "mcmc_inc_deg_median": 88.00496974274057,
+    "mcmc_inc_deg_std": 1.677934293617344,
+    "mcmc_t0_phase_median": -0.007201825364982211,
+    "mcmc_t0_phase_std": 0.004803219782886974,
+    "mcmc_depth_ppm": 253.21527514634738,
+    "mcmc_depth_err_ppm": 11.153167744431927,
+    "mcmc_duration_hours": 4.360643640314254,
+    "obs_raw_count": 69778,
+    "obs_cleaned_count": 57030,
+    "obs_processed_count": 57030,
+    "obs_clean_ratio": 0.8173063143111009,
+    "obs_time_span_days": 1470.4622004425764,
+    "transit_duty_cycle": 0.09269766317804905
+  }
+}
